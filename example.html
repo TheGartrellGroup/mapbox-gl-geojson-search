@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Add a polygon to a map using a GeoJSON source</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.5/dist/css/autoComplete.02.min.css">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+  <script src="./dist/main.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script>
+    mapboxgl.accessToken = 'insert token here...';
+    const map = new mapboxgl.Map({
+      container: 'map', // container ID
+      style: 'mapbox://styles/mapbox/light-v10', // style URL
+      center: [-95.9345, 41.2565], // starting position
+      zoom: 3 // starting zoom
+    });
+
+    map.on('load', function () {
+      // Add a data source containing GeoJSON data.
+      map.addSource('states', {
+        'type': 'geojson',
+        'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'
+      });
+
+      // Add a new layer to visualize the polygon.
+      map.addLayer({
+        'id': 'states',
+        'type': 'fill',
+        'source': 'states', // reference the data source
+        'layout': {},
+        'paint': {
+          'fill-color': '#0080ff', // blue color fill
+          'fill-opacity': 0.5
+        }
+      });
+      // Add a black outline around the polygon.
+      map.addLayer({
+        'id': 'outline',
+        'type': 'line',
+        'source': 'states',
+        'layout': {},
+        'paint': {
+          'line-color': '#000',
+          'line-width': 3
+        }
+      });
+
+      const search = new mapboxgl.MapboxSearch({
+        containerClass: 'search-container',
+        inputID: 'search-box',
+        characterThreshold: 2,
+        layers: [
+          {
+            "source": "states",
+            "displayName": "US States",
+            "category": "Cultural",
+            "type": "polygon",
+            "uniqueFeatureID": "name",
+            "searchProperties": ['name'],
+            "higlightColor": '#ff0'
+          },
+        ]
+      });
+
+      map.addControl(search)
+    });
+  </script>
+
+</body>
+
+</html>
