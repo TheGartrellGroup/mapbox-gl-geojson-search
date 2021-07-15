@@ -189,6 +189,14 @@ export default class MapboxSearch {
     initTypeAhead() {
         const id = `#${this.options.inputID}`;
 
+        //custom event listener to clear previous highlight
+        //no apparent way with autcomplete.js API
+        this._input.addEventListener('input', evt => {  
+            if (this._input.value === '' && this.highlighted) {
+                this._map.setFilter(`${this.chosenLayer.source}${this.highlightID}`, ['in', this.highlightID, ''])
+            }
+        });
+
         this._typeahead = new autoComplete({
             data: this.suggestions,
             threshold: this.options.characterThreshold,
@@ -202,24 +210,26 @@ export default class MapboxSearch {
             events: {
                 input: {
                     selection: (event) => {
+                        this.highlighted = false;
+                        
                         const id = event.detail.selection.value[this.chosenLayer.uniqueFeatureID];
                         const selection = get(event.detail.selection.value, event.detail.selection.key);
                         this._typeahead.input.value = selection;
                         this._typeahead.input.blur();
 
-                        this.zoomTo(id);
+                        this.zoomAndHighlight(id);
                     },
                     keydown: (event) => {
                         if (event.code === 'Enter' || event.key === 'Enter' || event.which === 13) {
                             this._typeahead.select(0);
                         }
-                    }
+                    },
                 }
             }
         })
     }
 
-    zoomTo(id) {
+    zoomAndHighlight(id) {
         const feat = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id)[0];
         const bounds = bbox(feat);
 
@@ -228,6 +238,7 @@ export default class MapboxSearch {
         });
 
         this._map.setFilter(`${this.chosenLayer.source}${this.highlightID}`, ['in', this.chosenLayer.uniqueFeatureID, id]);
+        this.highlighted = true;
     }
 }
 
