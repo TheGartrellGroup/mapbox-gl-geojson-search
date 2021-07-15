@@ -67,11 +67,81 @@
         }
       });
 
+      const points = {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "id": 1,
+              "location": "us"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -95.2734375,
+                36.59788913307022
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": 2,
+              "location": "canada"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -105.1171875,
+                49.15296965617042
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": 3,
+              "location": "mexico"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -107.9296875,
+                31.353636941500987
+              ]
+            }
+          }
+        ]
+      }
+
+      map.addSource('points', {
+        'type': 'geojson',
+        'data': points
+      });
+
+      map.addLayer({
+        'id': 'points',
+        'type': 'circle',
+        'source': 'points', // reference the data source
+        'layout': {},
+        'paint': {}
+      });
+
       const search = new mapboxgl.MapboxSearch({
         containerClass: 'search-container',
         inputID: 'search-box',
         characterThreshold: 2,
         layers: [
+          {
+            "source": "points",
+            "displayName": "Random Points",
+            "category": "Dots",
+            "type": "point",
+            "uniqueFeatureID": "id",
+            "searchProperties": ['id', 'location'],
+            "higlightColor": '#fff'
+          },
           {
             "source": "states",
             "displayName": "US States",
@@ -81,6 +151,7 @@
             "searchProperties": ['name'],
             "higlightColor": '#ff0'
           },
+
         ]
       });
 
