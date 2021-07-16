@@ -1,7 +1,7 @@
 'use strict';
 
 import autoComplete from "@tarekraafat/autocomplete.js";
-import { isObject, isNil, isNumber, isString, map as jsMap, get, uniqBy } from 'lodash';
+import { map as jsMap, get, isBoolean, isNil, isNumber, isObject, isString, uniqBy,  } from 'lodash';
 import { bbox } from '@turf/turf';
 
 export default class MapboxSearch {
@@ -43,7 +43,11 @@ export default class MapboxSearch {
             throw new Error('options is not a valid object');
         }
 
-        const { characterThreshold, containerClass, inputID, layers, maxSuggest, placeholderText, uniqueFeatureID } = this.options;
+        const { 
+            characterThreshold, containerClass, inputID, 
+            layers, maxSuggest, placeholderText, 
+            uniqueFeatureID
+        } = this.options;
         const identifiers = [containerClass, inputID];
         const regexIdentifierCheck = /^\w+(-\w+)*$/;
 
@@ -236,7 +240,7 @@ export default class MapboxSearch {
         //no apparent way with autcomplete.js API
         this._input.addEventListener('input', evt => {  
             if (this._input.value === '' && this.highlighted) {
-                
+
                 if (!isNil(this.previousLayer)) {
                     this._map.setFilter(`${this.previousLayer.source}${this.highlightID}`, ['in', this.highlightID, ''])
                 }
@@ -265,7 +269,7 @@ export default class MapboxSearch {
                         this._typeahead.input.value = selection;
                         this._typeahead.input.blur();
 
-                        this.zoomAndHighlight(id);
+                        this.identifyAndHiglight (id);
                     },
                     keydown: (event) => {
                         if (event.code === 'Enter' || event.key === 'Enter' || event.which === 13) {
@@ -277,13 +281,15 @@ export default class MapboxSearch {
         })
     }
 
-    zoomAndHighlight(id) {
-        const feat = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id)[0];
-        const bounds = bbox(feat);
-
-        this._map.fitBounds(bounds, {
-            padding: 100
-        });
+    identifyAndHiglight (id) {
+        if (this.chosenLayer.zoomOnSearch || isNil(this.chosenLayer.zoomOnSearch)) {
+            const feat = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id)[0];
+            const bounds = bbox(feat);
+    
+            this._map.fitBounds(bounds, {
+                padding: 100
+            });
+        }
 
         this._map.setFilter(`${this.chosenLayer.source}${this.highlightID}`, ['in', this.chosenLayer.uniqueFeatureID, id]);
         this.highlighted = true;
