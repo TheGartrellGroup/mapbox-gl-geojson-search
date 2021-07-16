@@ -1,0 +1,27 @@
+@import url("~@tarekraafat/autocomplete.js/dist/css/autoComplete.02.css");
+
+.mapbox-search-container {
+  max-width: 400px;
+
+  .autoComplete_wrapper {
+    display: flex;
+    justify-content: flex-end;
+    background: #fff;
+    border: 1px solid rgba(33,33,33,.2);
+    color: #747474;
+    outline: 0;
+
+    select.mapbox-search-select {
+      font-size: 1rem;
+      border-radius: 4px;
+      padding-left: 10px;
+    }
+    
+    input.mapbox-search,
+    select.mapbox-search-select {
+      background: none;
+      border: none;
+    }
+    
+  }
+}

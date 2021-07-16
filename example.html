@@ -8,6 +8,7 @@
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet">
   <link rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.5/dist/css/autoComplete.02.min.css">
+  <link rel="stylesheet" href="./styles/main.css">
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
   <script src="./dist/main.js"></script>
 
@@ -67,13 +68,13 @@
         }
       });
 
-      const points = {
+      const gjPoints = {
         "type": "FeatureCollection",
         "features": [
           {
             "type": "Feature",
             "properties": {
-              "id": 1,
+              "id": '111',
               "location": "us"
             },
             "geometry": {
@@ -87,7 +88,7 @@
           {
             "type": "Feature",
             "properties": {
-              "id": 2,
+              "id": '222',
               "location": "canada"
             },
             "geometry": {
@@ -101,7 +102,7 @@
           {
             "type": "Feature",
             "properties": {
-              "id": 3,
+              "id": '333',
               "location": "mexico"
             },
             "geometry": {
@@ -117,15 +118,62 @@
 
       map.addSource('points', {
         'type': 'geojson',
-        'data': points
+        'data': gjPoints
       });
 
       map.addLayer({
         'id': 'points',
         'type': 'circle',
-        'source': 'points', // reference the data source
-        'layout': {},
-        'paint': {}
+        'source': 'points',
+        'paint': {
+          'circle-color': '#ffa500'
+        }
+      });
+
+      const gjLine = {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "propID": "abc",
+              "randomAttribute": "Random Attribute",
+              "secondAttr": "Other Prop Attribute"
+            },
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -123.22265625000001,
+                  45.01141864227728
+                ],
+                [
+                  -117.46582031249999,
+                  33.5963189611327
+                ],
+                [
+                  -111.26953125,
+                  45.22848059584359
+                ]
+              ]
+            }
+          }
+        ]
+      }
+
+      map.addSource('some-line', {
+        'type': 'geojson',
+        'data': gjLine
+      });
+
+      map.addLayer({
+        'id': 'some-line',
+        'type': 'line',
+        'source': 'some-line',
+        'paint': {
+          'line-color': '#0f0',
+          'line-width': 3
+        }
       });
 
       const search = new mapboxgl.MapboxSearch({
@@ -136,22 +184,30 @@
           {
             "source": "points",
             "displayName": "Random Points",
-            "category": "Dots",
-            "type": "point",
+            "category": "Random",
+            "type": "circle",
             "uniqueFeatureID": "id",
-            "searchProperties": ['id', 'location'],
-            "higlightColor": '#fff'
+            "searchProperties": ['location'],
+            "highlightColor": '#f00'
           },
           {
             "source": "states",
             "displayName": "US States",
-            "category": "Cultural",
+            "category": "Geo",
             "type": "polygon",
             "uniqueFeatureID": "name",
             "searchProperties": ['name'],
-            "higlightColor": '#ff0'
+            "highlightColor": '#ff0'
           },
-
+          {
+            "source": "some-line",
+            "displayName": "Some Line",
+            "category": "Random",
+            "type": "line",
+            "uniqueFeatureID": "propID",
+            "searchProperties": ['randomAttribute', 'secondAttr'],
+            "highlightColor": '#ff0'
+          },
         ]
       });
 
