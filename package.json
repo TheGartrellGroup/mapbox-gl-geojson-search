@@ -2,7 +2,8 @@
   "name": "mapbox-gl-geojson-search",
   "version": "0.1.0",
   "description": "A layer search plugin for Mapbox GL JS",
-  "main": "dist/main.js",
+  "private": true,
+  "main": "src/index.js",
   "unpkg": "dist/main.js",
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production",
