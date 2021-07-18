@@ -1,7 +1,11 @@
 @import url("~@tarekraafat/autocomplete.js/dist/css/autoComplete.02.css");
 
 .mapbox-search-container {
-  max-width: 400px;
+    max-width: 400px;
+
+    button {
+        background-image: url("../assets/icons8-search.svg");
+    }
 
     .autoComplete_wrapper {
         display: flex;

@@ -22,8 +22,21 @@ export default class MapboxSearch {
             this._container = document.createElement('div');
             this.addIdentifier(this.options.containerClass, this._container);
 
-            this._input = document.createElement('input');
+            this._searchBtn = document.createElement('button');
+            this._searchBtn.addEventListener('click', () => {
+                this._searchBtn.style.display = 'none';
+                this._input.style.display = 'initial';
+                this._selectSearch.style.display = 'initial';
+            });
+            this._container.appendChild(this._searchBtn);
+            
+            this._searchBtnSpan = document.createElement('span');
+            this._searchBtnSpan.className = 'mapboxgl-ctrl-icon';
+            this._searchBtn.appendChild(this._searchBtnSpan);
+
+               this._input = document.createElement('input');
             this._input.type = 'search';
+            this._input.style.display = 'none';
             this._input.placeholder = this.options.placeholderText;
             this.addIdentifier(this.options.inputID, this._input);
           
@@ -95,7 +108,7 @@ export default class MapboxSearch {
 
         if (isDiv) {
             this.options.containerClass = `${elmName}-container`;
-            elm.className = `mapboxgl-ctrl ${this.options.containerClass}`;
+            elm.className = `mapboxgl-ctrl mapboxgl-ctrl-group ${this.options.containerClass}`;
         } else {
             this.options.inputID = `${elmName}-input`;
             elm.className = elmName;
@@ -116,6 +129,7 @@ export default class MapboxSearch {
     createLayerDropdown() {
         this._selectSearch = document.createElement('select');
         this._selectSearch.className = 'mapbox-search-select';
+        this._selectSearch.style.display = 'none';
 
         const cat = 'category';
 
