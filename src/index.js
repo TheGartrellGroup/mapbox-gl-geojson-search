@@ -10,33 +10,43 @@ export default class MapboxSearch {
         this.suggestions = {};
         this.highlightID = '_highlighted_search__';
         this.layerChanged = false;
+        this.searchVisible = false;
     }
 
     onAdd(map) {
         if (map && isObject(map)) {
             this._map = map;
+
             this.validateControlOptions();
             this.addInputObserver();
             this.createHighlightLayers();
 
+            //begin to add dom elements to search control
             this._container = document.createElement('div');
             this.addIdentifier(this.options.containerClass, this._container);
 
             this._searchBtn = document.createElement('button');
-            this._searchBtn.addEventListener('click', () => {
-                this._searchBtn.style.display = 'none';
-                this._input.style.display = 'initial';
-                this._selectSearch.style.display = 'initial';
-            });
+            this.addIdentifier(this.options.btnID, this._searchBtn);
             this._container.appendChild(this._searchBtn);
-            
+
+            //event listener to toggle search
+            this._searchBtn.addEventListener('click', () => {
+                const elms = [this._container, this._searchBtn, this._selectSearch, this._input];
+                elms.forEach(elm => elm.classList.toggle('active-search'));
+
+                this.searchVisible = !this.searchVisible;
+
+                if (this.searchVisible) {
+                    this._input.focus();
+                }
+            });
+
             this._searchBtnSpan = document.createElement('span');
             this._searchBtnSpan.className = 'mapboxgl-ctrl-icon';
             this._searchBtn.appendChild(this._searchBtnSpan);
 
-               this._input = document.createElement('input');
+            this._input = document.createElement('input');
             this._input.type = 'search';
-            this._input.style.display = 'none';
             this._input.placeholder = this.options.placeholderText;
             this.addIdentifier(this.options.inputID, this._input);
           
@@ -51,35 +61,36 @@ export default class MapboxSearch {
         this._map = undefined;
     }
 
-    // validate options passed by user
+    //validate custom options passed by user
     validateControlOptions() {
         if (!isObject(this.options)) {
             throw new Error('options is not a valid object');
         }
 
         const { 
-            characterThreshold, containerClass, inputID, 
-            layers, maxSuggest, placeholderText, 
-            uniqueFeatureID
+            btnID, characterThreshold, containerClass, 
+            inputID, layers, maxResults,
+            placeholderText, uniqueFeatureID
         } = this.options;
         const identifiers = [containerClass, inputID];
         const regexIdentifierCheck = /^\w+(-\w+)*$/;
 
         //containerClass
         //inputID
+        //btnID
         identifiers.forEach(el => {
             if (!isNil(el) && !regexIdentifierCheck.test(el)) {
                 throw new Error(`${el} is not a valid string for an identifier`);
             }
         });
 
-        //maxSuggest
-        if (isNil(maxSuggest)) {
-            this.options.maxSuggest = 5;
-        } else if (isNumber(maxSuggest)) {
-            this.options.maxSuggest = Math.round(maxSuggest);
+        //maxResults
+        if (isNil(maxResults)) {
+            this.options.maxResults = 5;
+        } else if (isNumber(maxResults)) {
+            this.options.maxResults = Math.round(maxResults);
         } else {
-            throw new Error(`${maxSuggest} is not a valid number for options.maxSuggest`);
+            throw new Error(`${maxResults} is not a valid number for options.maxResults`);
         }
 
         //placeholderText
@@ -102,26 +113,34 @@ export default class MapboxSearch {
         }
     }
 
+    //add custom identifier to dom elements
     addIdentifier(customName, elm) {
         const isDiv = elm.tagName === 'DIV';
+        const isInput = elm.tagName === 'INPUT';
+        const isBtn = elm.tagName === 'BUTTON';
+
         const elmName = 'mapbox-search';
 
         if (isDiv) {
             this.options.containerClass = `${elmName}-container`;
             elm.className = `mapboxgl-ctrl mapboxgl-ctrl-group ${this.options.containerClass}`;
-        } else {
+        } else if (isInput) {
             this.options.inputID = `${elmName}-input`;
             elm.className = elmName;
             elm.id = this.options.inputID;
+        } else if (isBtn) {
+            this.options.btnID = `${elmName}-btn`;
+            elm.className = elmName;
+            elm.id = this.options.btnID;
         }
         
         if (!isNil(customName) && (isString(customName) && customName.length)) {
             if (isDiv) {
                 elm.classList.add(customName);
                 this.optionsContainerClass += customName;
-            } else {
+            } else  {
                 elm.id = customName;
-                this.options.inputID = customName;
+                isInput ? this.options.inputID = customName : this.options.btnID = customName;
             } 
         }
     }
@@ -129,13 +148,14 @@ export default class MapboxSearch {
     createLayerDropdown() {
         this._selectSearch = document.createElement('select');
         this._selectSearch.className = 'mapbox-search-select';
-        this._selectSearch.style.display = 'none';
 
         const cat = 'category';
 
+        //get unique set of layers
         this.uniqLyrCat = jsMap(uniqBy(this.options.layers, cat), cat);
         this.layerDropwdowns = [];
 
+        //populate layers in layer picker dropdown
         for (const category of this.uniqLyrCat) {
             let optGrp = document.createElement('optgroup');
             optGrp.setAttribute('label', category);
@@ -155,6 +175,8 @@ export default class MapboxSearch {
         const wrapper = document.getElementsByClassName('autoComplete_wrapper')[0];
         wrapper.appendChild(this._selectSearch);
 
+        //trigger event when layer is change 
+        //new layer data is loaded into autocomplete
         this._selectSearch.addEventListener('change', async (evt) => { 
             this.layerChanged = true;
             this.previousLayer = this.chosenLayer;
@@ -169,7 +191,7 @@ export default class MapboxSearch {
     }
 
     createHighlightLayers() {
-
+        //check layer type to highlight polygon vs circle vs linestring
         for (const layer of this.options.layers) {
             const { highlightColor, source, type } = layer;
 
@@ -199,6 +221,7 @@ export default class MapboxSearch {
 
     }
 
+    //mutation needed to populate autocomplete with layer data
     addInputObserver() {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -223,6 +246,10 @@ export default class MapboxSearch {
         this.createLayerDropdown();
     }
 
+    //layer needs to be requested as raw geojson features
+    //to offset search for features outside view port
+    //as both map.queryRenderedFeatures and map.querySourceFeatures 
+    //do not allow this ability
     async getLayerData(lyr) {
         this.chosenLayer = lyr;
         const props = ['source', 'displayName', 'id', 'category', 'type', 'uniqueFeatureID'];
@@ -249,10 +276,12 @@ export default class MapboxSearch {
 
     }
 
+    //initialize autocomplete/typeahead suggestion plugin
     initTypeAhead() {
         const id = `#${this.options.inputID}`;
 
-        //custom event listener to clear previous highlight
+        //custom event listener to identify 
+        //if the input field has been cleared
         //no apparent way with autcomplete.js API
         this._input.addEventListener('input', evt => {  
             if (this._input.value === '' && this.highlighted) {
@@ -272,6 +301,9 @@ export default class MapboxSearch {
                     render: true
                 }
             },
+            resultsList: {
+                maxResults: this.options.maxResults
+            },
             events: {
                 input: {
                     selection: (event) => {
@@ -282,6 +314,7 @@ export default class MapboxSearch {
                             this.layerChanged = false;
                         }
                         
+                        //identify unique features by provided id
                         const id = event.detail.selection.value[this.chosenLayer.uniqueFeatureID];
                         const selection = get(event.detail.selection.value, event.detail.selection.key);
                         this._typeahead.input.value = selection;
@@ -299,7 +332,9 @@ export default class MapboxSearch {
         })
     }
 
+    //highlight identified layer
     identifyAndHiglight(id) {
+        //only zoom to highlighted feature if zoomOnSearch !== false
         if (this.chosenLayer.zoomOnSearch || isNil(this.chosenLayer.zoomOnSearch)) {
             const feat = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id)[0];
             const bounds = bbox(feat);
@@ -313,6 +348,7 @@ export default class MapboxSearch {
         this.highlighted = true;
     }
 
+    //remove prior highlight
     clearPreviousHighlight() {
         if (!isNil(this.previousLayer)) {
             this._map.setFilter(`${this.previousLayer.source}${this.highlightID}`, ['in', this.highlightID, ''])

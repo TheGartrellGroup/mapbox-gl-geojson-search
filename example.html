@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Add a polygon to a map using a GeoJSON source</title>
+  <title>Add search control to query GeoJSON sources</title>
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet">
   <link rel="stylesheet" href="./dist/mapbox-search.min.css">
@@ -43,7 +43,6 @@
         'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'
       });
 
-      // Add a new layer to visualize the polygon.
       map.addLayer({
         'id': 'states',
         'type': 'fill',
@@ -54,7 +53,7 @@
           'fill-opacity': 0.5
         }
       });
-      // Add a black outline around the polygon.
+
       map.addLayer({
         'id': 'outline',
         'type': 'line',
@@ -72,7 +71,7 @@
           {
             "type": "Feature",
             "properties": {
-              "id": '111',
+              "id": 1,
               "location": "us"
             },
             "geometry": {
@@ -86,7 +85,7 @@
           {
             "type": "Feature",
             "properties": {
-              "id": '222',
+              "id": 2,
               "location": "canada"
             },
             "geometry": {
@@ -100,7 +99,7 @@
           {
             "type": "Feature",
             "properties": {
-              "id": '333',
+              "id": 3,
               "location": "mexico"
             },
             "geometry": {
@@ -108,6 +107,34 @@
               "coordinates": [
                 -107.9296875,
                 31.353636941500987
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": 4,
+              "location": "mexico 2"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -102.26074218749999,
+                26.941659545381516
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": 5,
+              "location": "mexico 3"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -105.2490234375,
+                25.997549919572112
               ]
             }
           }
@@ -175,19 +202,23 @@
       });
 
       const search = new mapboxgl.MapboxSearch({
-        containerClass: 'search-container',
-        inputID: 'search-box',
-        characterThreshold: 2,
+        containerClass: 'search-container', //class name for entire search control container (optional)
+        inputID: 'search-box', //search input field id name (optional)
+        btnID: 'search-btn', //search button (magnifying glass) to toggle search field (optional)
+        characterThreshold: 2, //how many characters before showing results (defaults to 5)
+        maxResults: 4, //how many results are show (defaults to 5)
+
+        // all layer properties below are require - other than zoomOnSearch and highlightProperties
         layers: [
           {
-            "source": "points",
-            "displayName": "Random Points",
-            "category": "Random",
-            "type": "circle",
-            "uniqueFeatureID": "id",
-            "zoomOnSearch": false,
-            "searchProperties": ['location'],
-            "highlightColor": '#f00'
+            "source": "points", //layer reference source - map.addLayer (required)
+            "displayName": "Random Points", //name shown in layer picker (required)
+            "category": "Random", //allow for categories in layer picker (required)
+            "type": "circle", //feature type (required)
+            "uniqueFeatureID": "id", //unique identifier to identify searched feature - this must be unique per feature (required)
+            "zoomOnSearch": false, //defaults to true (optional)
+            "searchProperties": ['location'], //geojson feature properties to search against (required)
+            "highlightColor": '#f00' //highlight color (optional - defaults to yellow)
           },
           {
             "source": "states",
@@ -211,6 +242,7 @@
         ]
       });
 
+      map.addControl(new mapboxgl.NavigationControl());
       map.addControl(search)
     });
   </script>

@@ -1,10 +1,24 @@
 @import url("~@tarekraafat/autocomplete.js/dist/css/autoComplete.02.css");
 
+.active-search {
+    display: block !important;
+}
 .mapbox-search-container {
-    max-width: 400px;
+    max-width: 425px;
+
+    &.active-search {
+        box-shadow: none;
+        background: none;
+    }
 
     button {
         background-image: url("../assets/icons8-search.svg");
+
+        &.active-search {
+            float: right;
+            margin-left: 2px;
+            margin-top: 7px;
+        };
     }
 
     .autoComplete_wrapper {
@@ -27,6 +41,7 @@
     
     input.mapbox-search,
     select.mapbox-search-select {
+        display: none;
         background: none;
         border: none;
     }
