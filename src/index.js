@@ -1,7 +1,7 @@
 'use strict';
 
 import autoComplete from "@tarekraafat/autocomplete.js";
-import { map as jsMap, get, isBoolean, isNil, isNumber, isObject, isString, uniqBy,  } from 'lodash';
+import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy,  } from 'lodash';
 import { bbox } from '@turf/turf';
 
 export default class MapboxSearch {
@@ -9,6 +9,7 @@ export default class MapboxSearch {
         this.options = options;
         this.suggestions = {};
         this.highlightID = '_highlighted_search__';
+        this.layerChanged = false;
     }
 
     onAdd(map) {
@@ -141,6 +142,7 @@ export default class MapboxSearch {
         wrapper.appendChild(this._selectSearch);
 
         this._selectSearch.addEventListener('change', async (evt) => { 
+            this.layerChanged = true;
             this.previousLayer = this.chosenLayer;
 
             const val = evt.target.value;
@@ -240,13 +242,10 @@ export default class MapboxSearch {
         //no apparent way with autcomplete.js API
         this._input.addEventListener('input', evt => {  
             if (this._input.value === '' && this.highlighted) {
-
-                if (!isNil(this.previousLayer)) {
-                    this._map.setFilter(`${this.previousLayer.source}${this.highlightID}`, ['in', this.highlightID, ''])
-                }
-
-                this._map.setFilter(`${this.chosenLayer.source}${this.highlightID}`, ['in', this.highlightID, ''])
+                this.clearPreviousHighlight();
             }
+
+            this._lastSearchedValue = this._input.value;
         });
 
         this._typeahead = new autoComplete({
@@ -264,6 +263,11 @@ export default class MapboxSearch {
                     selection: (event) => {
                         this.highlighted = false;
 
+                        if (this.layerChanged) {
+                            this.clearPreviousHighlight();
+                            this.layerChanged = false;
+                        }
+                        
                         const id = event.detail.selection.value[this.chosenLayer.uniqueFeatureID];
                         const selection = get(event.detail.selection.value, event.detail.selection.key);
                         this._typeahead.input.value = selection;
@@ -281,7 +285,7 @@ export default class MapboxSearch {
         })
     }
 
-    identifyAndHiglight (id) {
+    identifyAndHiglight(id) {
         if (this.chosenLayer.zoomOnSearch || isNil(this.chosenLayer.zoomOnSearch)) {
             const feat = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id)[0];
             const bounds = bbox(feat);
@@ -293,6 +297,14 @@ export default class MapboxSearch {
 
         this._map.setFilter(`${this.chosenLayer.source}${this.highlightID}`, ['in', this.chosenLayer.uniqueFeatureID, id]);
         this.highlighted = true;
+    }
+
+    clearPreviousHighlight() {
+        if (!isNil(this.previousLayer)) {
+            this._map.setFilter(`${this.previousLayer.source}${this.highlightID}`, ['in', this.highlightID, ''])
+        }
+
+        this._map.setFilter(`${this.chosenLayer.source}${this.highlightID}`, ['in', this.highlightID, ''])
     }
 }
 
