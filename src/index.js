@@ -1,7 +1,7 @@
 'use strict';
 
 import autoComplete from "@tarekraafat/autocomplete.js";
-import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy,  } from 'lodash';
+import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, } from 'lodash';
 import { bbox } from '@turf/turf';
 
 export default class MapboxSearch {
@@ -49,7 +49,7 @@ export default class MapboxSearch {
             this._input.type = 'search';
             this._input.placeholder = this.options.placeholderText;
             this.addIdentifier(this.options.inputID, this._input);
-          
+
             this._container.appendChild(this._input);
 
             return this._container;
@@ -67,8 +67,8 @@ export default class MapboxSearch {
             throw new Error('options is not a valid object');
         }
 
-        const { 
-            btnID, characterThreshold, containerClass, 
+        const {
+            btnID, characterThreshold, containerClass,
             inputID, layers, maxResults,
             placeholderText, uniqueFeatureID
         } = this.options;
@@ -133,15 +133,15 @@ export default class MapboxSearch {
             elm.className = elmName;
             elm.id = this.options.btnID;
         }
-        
+
         if (!isNil(customName) && (isString(customName) && customName.length)) {
             if (isDiv) {
                 elm.classList.add(customName);
                 this.optionsContainerClass += customName;
-            } else  {
+            } else {
                 elm.id = customName;
                 isInput ? this.options.inputID = customName : this.options.btnID = customName;
-            } 
+            }
         }
     }
 
@@ -177,7 +177,7 @@ export default class MapboxSearch {
 
         //trigger event when layer is change 
         //new layer data is loaded into autocomplete
-        this._selectSearch.addEventListener('change', async (evt) => { 
+        this._selectSearch.addEventListener('change', async (evt) => {
             this.layerChanged = true;
             this.previousLayer = this.chosenLayer;
 
@@ -254,7 +254,7 @@ export default class MapboxSearch {
         this.chosenLayer = lyr;
         const props = ['source', 'displayName', 'id', 'category', 'type', 'uniqueFeatureID'];
         const layerSource = this._map.getSource(this.chosenLayer.source);
- 
+
         if (isNil(this.chosenLayer.uniqueFeatureID) || !this.chosenLayer.uniqueFeatureID.length) {
             throw new Error('options.uniqueFeatureID is required for every layer');
         }
@@ -283,7 +283,7 @@ export default class MapboxSearch {
         //custom event listener to identify 
         //if the input field has been cleared
         //no apparent way with autcomplete.js API
-        this._input.addEventListener('input', evt => {  
+        this._input.addEventListener('input', evt => {
             if (this._input.value === '' && this.highlighted) {
                 this.clearPreviousHighlight();
             }
@@ -297,9 +297,19 @@ export default class MapboxSearch {
             selector: id,
             submit: true,
             resultItem: {
-                highlight: {
-                    render: true
-                }
+                element: (item, data) => {
+                    item.style = "display: flex; justify-content: space-between;";
+                    //add attribute to right side of results
+                    item.innerHTML = `
+                        <span style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                            ${data.match}
+                        </span>
+                        <span style="display: flex; align-items: center; font-size: 13px; font-weight: 300; color: rgba(0,0,0,.75);">
+                            ${data.key}
+                        </span>
+                    `;
+                },
+                highlight: true
             },
             resultsList: {
                 maxResults: this.options.maxResults
@@ -313,14 +323,14 @@ export default class MapboxSearch {
                             this.clearPreviousHighlight();
                             this.layerChanged = false;
                         }
-                        
+
                         //identify unique features by provided id
                         const id = event.detail.selection.value[this.chosenLayer.uniqueFeatureID];
                         const selection = get(event.detail.selection.value, event.detail.selection.key);
                         this._typeahead.input.value = selection;
                         this._typeahead.input.blur();
 
-                        this.identifyAndHiglight (id);
+                        this.identifyAndHiglight(id);
                     },
                     keydown: (event) => {
                         if (event.code === 'Enter' || event.key === 'Enter' || event.which === 13) {
@@ -338,7 +348,7 @@ export default class MapboxSearch {
         if (this.chosenLayer.zoomOnSearch || isNil(this.chosenLayer.zoomOnSearch)) {
             const feat = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id)[0];
             const bounds = bbox(feat);
-    
+
             this._map.fitBounds(bounds, {
                 padding: 100
             });

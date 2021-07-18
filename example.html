@@ -65,6 +65,21 @@
         }
       });
 
+      map.addSource('railroads', {
+        'type': 'geojson',
+        'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'
+      });
+
+      map.addLayer({
+        'id': 'railroads',
+        'type': 'line',
+        'source': 'railroads',
+        'paint': {
+          'line-color': '#924e4e',
+          'line-width': 2
+        }
+      });
+
       const gjPoints = {
         "type": "FeatureCollection",
         "features": [
@@ -155,58 +170,12 @@
         }
       });
 
-      const gjLine = {
-        "type": "FeatureCollection",
-        "features": [
-          {
-            "type": "Feature",
-            "properties": {
-              "propID": "abc",
-              "randomAttribute": "Random Attribute",
-              "secondAttr": "Other Prop Attribute"
-            },
-            "geometry": {
-              "type": "LineString",
-              "coordinates": [
-                [
-                  -123.22265625000001,
-                  45.01141864227728
-                ],
-                [
-                  -117.46582031249999,
-                  33.5963189611327
-                ],
-                [
-                  -111.26953125,
-                  45.22848059584359
-                ]
-              ]
-            }
-          }
-        ]
-      }
-
-      map.addSource('some-line', {
-        'type': 'geojson',
-        'data': gjLine
-      });
-
-      map.addLayer({
-        'id': 'some-line',
-        'type': 'line',
-        'source': 'some-line',
-        'paint': {
-          'line-color': '#0f0',
-          'line-width': 3
-        }
-      });
-
       const search = new mapboxgl.MapboxSearch({
         containerClass: 'search-container', //class name for entire search control container (optional)
         inputID: 'search-box', //search input field id name (optional)
         btnID: 'search-btn', //search button (magnifying glass) to toggle search field (optional)
         characterThreshold: 2, //how many characters before showing results (defaults to 5)
-        maxResults: 4, //how many results are show (defaults to 5)
+        maxResults: 10, //how many results are show (defaults to 5)
 
         // all layer properties below are require - other than zoomOnSearch and highlightProperties
         layers: [
@@ -227,16 +196,16 @@
             "type": "polygon",
             "zoomOnSearch": true,
             "uniqueFeatureID": "name",
-            "searchProperties": ['name'],
+            "searchProperties": ['name', 'postal'],
             "highlightColor": '#ff0'
           },
           {
-            "source": "some-line",
-            "displayName": "Some Line",
+            "source": "railroads",
+            "displayName": "Railroads",
             "category": "Random",
             "type": "line",
-            "uniqueFeatureID": "propID",
-            "searchProperties": ['randomAttribute', 'secondAttr'],
+            "uniqueFeatureID": "uident",
+            "searchProperties": ['uident'],
             "highlightColor": '#ff0'
           },
         ]
