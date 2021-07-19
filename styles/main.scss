@@ -3,7 +3,9 @@
 .active-search {
     display: block !important;
 }
+
 .mapbox-search-container {
+    display: none;
     max-width: 425px;
 
     &.active-search {

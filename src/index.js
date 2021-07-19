@@ -1,8 +1,8 @@
 'use strict';
 
 import autoComplete from "@tarekraafat/autocomplete.js";
-import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, } from 'lodash';
-import { bbox } from '@turf/turf';
+import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, map, } from 'lodash';
+import BBOX from '@turf/bbox';
 
 export default class MapboxSearch {
     constructor(options) {
@@ -69,8 +69,7 @@ export default class MapboxSearch {
 
         const {
             btnID, characterThreshold, containerClass,
-            inputID, layers, maxResults,
-            placeholderText, uniqueFeatureID
+            inputID, layers, maxResults, placeholderText,
         } = this.options;
         const identifiers = [containerClass, inputID];
         const regexIdentifierCheck = /^\w+(-\w+)*$/;
@@ -193,11 +192,20 @@ export default class MapboxSearch {
     createHighlightLayers() {
         //check layer type to highlight polygon vs circle vs linestring
         for (const layer of this.options.layers) {
-            const { highlightColor, source, type } = layer;
+            const { dataPath, highlightColor, source, type } = layer;
+            let highlightSource;
+            
+            if (!isNil(dataPath) && isString(dataPath)) {
+
+                map.addSource(source, {
+                    'type': 'geojson',
+                    'data': dataPath
+                  });
+            }
 
             let highlightLayerConfig = {
                 'id': `${source}${this.highlightID}`,
-                'source': source,
+                'source': highlightSource,
                 'filter': ['in', this.highlightID, '']
             };
 
@@ -227,9 +235,11 @@ export default class MapboxSearch {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
                     if (node.className.includes(this.options.containerClass)) {
-                        this._container.style.display = 'initial';
-                        this.populateData();
                         observer.disconnect();
+
+                        this._map.once('idle', () => {
+                            this.populateData();
+                        })
                     }
                 });
             });
@@ -244,6 +254,7 @@ export default class MapboxSearch {
         await this.getLayerData(firstLyr);
         this.initTypeAhead();
         this.createLayerDropdown();
+        this._container.style.display = 'initial';
     }
 
     //layer needs to be requested as raw geojson features
@@ -261,6 +272,9 @@ export default class MapboxSearch {
 
         if (layerSource.type !== 'geojson') {
             throw new Error(`${source} layer is not a valid geojson`);
+        } else if (!isNil(this.chosenLayer.dataPath) && isString(this.chosenLayer.dataPath)) {
+            const response = await fetch(this.chosenLayer.dataPath);
+            this.currentData = await response.json();
         } else if (isString(layerSource._data)) {
             const response = await fetch(layerSource._data);
             this.currentData = await response.json();
@@ -349,7 +363,7 @@ export default class MapboxSearch {
             const pitch = this._map.getPitch();
             const bearing = this._map.getBearing();
             const feat = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id)[0];
-            const bounds = bbox(feat);
+            const bounds = BBOX(feat);
 
             this._map.fitBounds(bounds, {
                 pitch,

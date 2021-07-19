@@ -38,15 +38,15 @@
 
     map.on('load', function () {
       // Add a data source containing GeoJSON data.
-      map.addSource('states', {
+      map.addSource('places', {
         'type': 'geojson',
-        'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'
+        'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_map_units.geojson'
       });
 
       map.addLayer({
-        'id': 'states',
+        'id': 'places',
         'type': 'fill',
-        'source': 'states', // reference the data source
+        'source': 'places', // reference the data source
         'layout': {},
         'paint': {
           'fill-color': '#0080ff', // blue color fill
@@ -57,7 +57,7 @@
       map.addLayer({
         'id': 'outline',
         'type': 'line',
-        'source': 'states',
+        'source': 'places',
         'layout': {},
         'paint': {
           'line-color': '#000',
@@ -179,25 +179,26 @@
 
         // all layer properties below are require - other than zoomOnSearch and highlightProperties
         layers: [
-          {
-            "source": "points", //layer reference source - map.addLayer (required)
-            "displayName": "Random Points", //name shown in layer picker (required)
-            "category": "Random", //allow for categories in layer picker (required)
-            "type": "circle", //feature type (required)
-            "uniqueFeatureID": "id", //unique identifier to identify searched feature - this must be unique per feature (required)
-            "zoomOnSearch": false, //defaults to true (optional)
-            "searchProperties": ['location'], //geojson feature properties to search against (required)
-            "highlightColor": '#f00' //highlight color (optional - defaults to yellow)
+        {
+            "source": "places", //layer reference source - map.addLayer (required)
+            "displayName": "Places", //name shown in layer picker (required)
+            "category": "Geo", //allow for categories in layer picker (required)
+            "type": "polygon", //feature type (required)
+            "zoomOnSearch": true, //defaults to true (optional)
+            "uniqueFeatureID": "adm0_a3", //unique identifier to identify searched feature - this must be unique per feature (required)
+            "searchProperties": ['name', 'name_long'], //geojson feature properties to search against (required)
+            "highlightColor": '#ff0', //highlight color (optional - defaults to yellow),
+            "dataPath": 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_map_units.geojson' //only use when loading layers dynamically or source is initial empty (optional)
           },
           {
-            "source": "states",
-            "displayName": "US States",
-            "category": "Geo",
-            "type": "polygon",
-            "zoomOnSearch": true,
-            "uniqueFeatureID": "name",
-            "searchProperties": ['name', 'postal'],
-            "highlightColor": '#ff0'
+            "source": "points",
+            "displayName": "Random Points",
+            "category": "Random",
+            "type": "circle",
+            "uniqueFeatureID": "id",
+            "zoomOnSearch": false,
+            "searchProperties": ['location'],
+            "highlightColor": '#f00'
           },
           {
             "source": "railroads",
