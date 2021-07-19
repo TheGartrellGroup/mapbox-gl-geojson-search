@@ -193,19 +193,14 @@ export default class MapboxSearch {
         //check layer type to highlight polygon vs circle vs linestring
         for (const layer of this.options.layers) {
             const { dataPath, highlightColor, source, type } = layer;
-            let highlightSource;
             
             if (!isNil(dataPath) && isString(dataPath)) {
-
-                map.addSource(source, {
-                    'type': 'geojson',
-                    'data': dataPath
-                  });
+                this._map.getSource(source).setData(dataPath);
             }
 
             let highlightLayerConfig = {
                 'id': `${source}${this.highlightID}`,
-                'source': highlightSource,
+                'source': source,
                 'filter': ['in', this.highlightID, '']
             };
 
