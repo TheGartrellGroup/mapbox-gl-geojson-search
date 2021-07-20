@@ -357,10 +357,13 @@ export default class MapboxSearch {
         if (this.chosenLayer.zoomOnSearch || isNil(this.chosenLayer.zoomOnSearch)) {
             const pitch = this._map.getPitch();
             const bearing = this._map.getBearing();
-            const feat = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id)[0];
-            const bounds = BBOX(feat);
+            const feats = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id);
+            const gj = {
+                "type": "FeatureCollection",
+                "features": feats
+            }
 
-            this._map.fitBounds(bounds, {
+            this._map.fitBounds(BBOX(gj), {
                 pitch,
                 bearing,
                 padding: 100
