@@ -38,15 +38,15 @@
 
     map.on('load', function () {
       // Add a data source containing GeoJSON data.
-      map.addSource('places', {
+      map.addSource('states', {
         'type': 'geojson',
-        'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_map_units.geojson'
+        'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'
       });
 
       map.addLayer({
-        'id': 'places',
+        'id': 'states',
         'type': 'fill',
-        'source': 'places', // reference the data source
+        'source': 'states', // reference the data source
         'layout': {},
         'paint': {
           'fill-color': '#0080ff', // blue color fill
@@ -57,26 +57,11 @@
       map.addLayer({
         'id': 'outline',
         'type': 'line',
-        'source': 'places',
+        'source': 'states',
         'layout': {},
         'paint': {
           'line-color': '#000',
           'line-width': 3
-        }
-      });
-
-      map.addSource('railroads', {
-        'type': 'geojson',
-        'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'
-      });
-
-      map.addLayer({
-        'id': 'railroads',
-        'type': 'line',
-        'source': 'railroads',
-        'paint': {
-          'line-color': '#924e4e',
-          'line-width': 2
         }
       });
 
@@ -86,7 +71,7 @@
           {
             "type": "Feature",
             "properties": {
-              "id": 1,
+              "id": '111',
               "location": "us"
             },
             "geometry": {
@@ -100,7 +85,7 @@
           {
             "type": "Feature",
             "properties": {
-              "id": 2,
+              "id": '222',
               "location": "canada"
             },
             "geometry": {
@@ -114,7 +99,7 @@
           {
             "type": "Feature",
             "properties": {
-              "id": 3,
+              "id": '333',
               "location": "mexico"
             },
             "geometry": {
@@ -122,34 +107,6 @@
               "coordinates": [
                 -107.9296875,
                 31.353636941500987
-              ]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "id": 4,
-              "location": "mexico 2"
-            },
-            "geometry": {
-              "type": "Point",
-              "coordinates": [
-                -102.26074218749999,
-                26.941659545381516
-              ]
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {
-              "id": 5,
-              "location": "mexico 3"
-            },
-            "geometry": {
-              "type": "Point",
-              "coordinates": [
-                -105.2490234375,
-                25.997549919572112
               ]
             }
           }
@@ -170,49 +127,102 @@
         }
       });
 
+      const gjLine = {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "propID": "abc",
+              "randomAttribute": "Random Attribute",
+              "secondAttr": "Other Prop Attribute"
+            },
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -123.22265625000001,
+                  45.01141864227728
+                ],
+                [
+                  -117.46582031249999,
+                  33.5963189611327
+                ],
+                [
+                  -111.26953125,
+                  45.22848059584359
+                ]
+              ]
+            }
+          }
+        ]
+      }
+
+      map.addSource('some-line', {
+        'type': 'geojson',
+        'data': gjLine
+      });
+
+      map.addLayer({
+        'id': 'some-line',
+        'type': 'line',
+        'source': 'some-line',
+        'paint': {
+          'line-color': '#0f0',
+          'line-width': 3
+        }
+      });
+
       const search = new mapboxgl.MapboxSearch({
         containerClass: 'search-container', //class name for entire search control container (optional)
         inputID: 'search-box', //search input field id name (optional)
         btnID: 'search-btn', //search button (magnifying glass) to toggle search field (optional)
         characterThreshold: 2, //how many characters before showing results (defaults to 5)
-        maxResults: 10, //how many results are show (defaults to 5)
-
+        maxResults: 4, //how many results are show (defaults to 5)
+        
         // all layer properties below are require - other than zoomOnSearch and highlightProperties
         layers: [
-        {
-            "source": "places", //layer reference source - map.addLayer (required)
-            "displayName": "Places", //name shown in layer picker (required)
-            "category": "Geo", //allow for categories in layer picker (required)
-            "type": "polygon", //feature type (required)
-            "zoomOnSearch": true, //defaults to true (optional)
-            "uniqueFeatureID": "adm0_a3", //unique identifier to identify searched feature - this must be unique per feature (required)
-            "searchProperties": ['name', 'name_long'], //geojson feature properties to search against (required)
-            "highlightColor": '#ff0', //highlight color (optional - defaults to yellow),
-            "dataPath": 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_map_units.geojson' //only use when loading layers dynamically or source is initial empty (optional)
-          },
           {
-            "source": "points",
-            "displayName": "Random Points",
-            "category": "Random",
-            "type": "circle",
-            "uniqueFeatureID": "id",
-            "zoomOnSearch": false,
-            "searchProperties": ['location'],
+            "source": "points", //layer reference source - map.addLayer (required)
+            "displayName": "Random Points", //name shown in layer picker (required)
+            "category": "Random", //allow for categories in layer picker (required)
+            "type": "circle", //feature type (required)
+            "uniqueFeatureID": "id", //unique identifier to identify searched feature (required)
+            "zoomOnSearch": false, //defaults to true (optional)
+            "searchProperties": ['location'], //geojson feature opr(required)
             "highlightColor": '#f00'
           },
           {
-            "source": "railroads",
-            "displayName": "Railroads",
+            "source": "states",
+            "displayName": "US States",
+            "category": "Geo",
+            "type": "polygon",
+            "zoomOnSearch": true,
+            "uniqueFeatureID": "name",
+            "searchProperties": ['name'],
+            "highlightColor": '#ff0'
+          },
+          {
+            "source": "some-line",
+            "displayName": "Some Line",
             "category": "Random",
             "type": "line",
-            "uniqueFeatureID": "uident",
-            "searchProperties": ['uident'],
+            "uniqueFeatureID": "propID",
+            "searchProperties": ['randomAttribute', 'secondAttr'],
             "highlightColor": '#ff0'
           },
         ]
       });
 
       map.addControl(new mapboxgl.NavigationControl());
+      map.addControl(
+        new mapboxgl.GeolocateControl({
+          positionOptions: {
+            enableHighAccuracy: true
+          },
+          trackUserLocation: true
+        })
+      );
       map.addControl(search)
     });
   </script>

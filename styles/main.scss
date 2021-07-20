@@ -1,4 +1,5 @@
 @import url("~@tarekraafat/autocomplete.js/dist/css/autoComplete.02.css");
+@import url("~@fortawesome/fontawesome-free/css/all.css");
 
 .active-search {
     display: block !important;
@@ -11,11 +12,9 @@
     &.active-search {
         box-shadow: none;
         background: none;
-    }
+    } 
 
     button {
-        background-image: url("../assets/icons8-search.svg");
-
         &.active-search {
             float: right;
             margin-left: 2px;
@@ -27,8 +26,8 @@
         display: flex;
         justify-content: flex-end;
         background: #fff;
-        border: 1px solid rgba(33,33,33,.2);
-        border-radius: 4px;
+        border: 0;
+        border-radius: 4px; 
         color: #747474;
         outline: 0;
 
