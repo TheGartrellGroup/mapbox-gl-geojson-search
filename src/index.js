@@ -1,7 +1,7 @@
 'use strict';
 
 import autoComplete from "@tarekraafat/autocomplete.js";
-import { map as jsMap, get, isNil, isNumber, isObject, isString, mapValues, uniqBy, pullAll } from 'lodash';
+import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, pullAll } from 'lodash';
 import '@fortawesome/fontawesome-free/js/all';
 import BBOX from '@turf/bbox';
 
