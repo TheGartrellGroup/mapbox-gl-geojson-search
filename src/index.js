@@ -1,7 +1,7 @@
 'use strict';
 
 import autoComplete from "@tarekraafat/autocomplete.js";
-import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, map, } from 'lodash';
+import { map as jsMap, get, isNil, isNumber, isObject, isString, mapValues, uniqBy, pullAll } from 'lodash';
 import '@fortawesome/fontawesome-free/js/all';
 import BBOX from '@turf/bbox';
 
@@ -266,6 +266,10 @@ export default class MapboxSearch {
             throw new Error('options.uniqueFeatureID is required for every layer');
         }
 
+        if (!isNil(this.chosenLayer.searchProperties) && !isNil(this.chosenLayer.excludedProperties)) {
+            throw new Error('both options.searchProperties and options.excludedProperties cannot be included at the same time')
+        }
+
         if (layerSource.type !== 'geojson') {
             throw new Error(`${source} layer is not a valid geojson`);
         } else if (!isNil(this.chosenLayer.dataPath) && isString(this.chosenLayer.dataPath)) {
@@ -278,12 +282,16 @@ export default class MapboxSearch {
             this.currentData = layerSource._data;
         }
 
-        if (!isNil(this.chosenLayer.searchProperties) && Array.isArray(this.chosenLayer.searchProperties)) {
-            let items = jsMap(this.currentData.features, item => item.properties);
-            this.suggestions.src = items;
-            this.suggestions.keys = this.chosenLayer.searchProperties;
-        }
+        let items = jsMap(this.currentData.features, item => item.properties);
+        //replace null values with empty string
+        this.suggestions.src = JSON.parse(JSON.stringify(items).replace(/\:null/gi, "\:\"\""));
 
+        if (!isNil(this.chosenLayer.searchProperties) && Array.isArray(this.chosenLayer.searchProperties)) {
+            this.suggestions.keys = this.chosenLayer.searchProperties;
+        } else if (!isNil(this.chosenLayer.excludedProperties) && Array.isArray(this.chosenLayer.excludedProperties)) {
+            let keys = Object.keys(items[0]);
+            this.suggestions.keys = pullAll(keys, this.chosenLayer.excludedProperties);
+        }
     }
 
     //initialize autocomplete/typeahead suggestion plugin

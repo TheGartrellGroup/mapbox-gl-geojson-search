@@ -186,7 +186,8 @@
             "type": "polygon", //feature type (required)
             "zoomOnSearch": true, //defaults to true (optional)
             "uniqueFeatureID": "adm0_a3", //unique identifier to identify searched feature - this must be unique per feature (required)
-            "searchProperties": ['name', 'name_long'], //geojson feature properties to search against (required)
+            // "searchProperties": ['name', 'name_long'], //geojson feature properties to search against (optional)
+            "excludedProperties": ["name_long", "geounit", "gu_a3"], //geojson feature properties to exclude (optional)
             "highlightColor": '#ff0', //highlight color (optional - defaults to yellow),
             "dataPath": 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_map_units.geojson' //only use when loading layers dynamically or source is initial empty (optional)
           },
