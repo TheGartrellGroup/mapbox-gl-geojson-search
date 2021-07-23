@@ -1,6 +1,7 @@
 'use strict';
 
 import autoComplete from "@tarekraafat/autocomplete.js";
+import interact from 'interactjs'
 import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, pullAll } from 'lodash';
 import '@fortawesome/fontawesome-free/js/all';
 import BBOX from '@turf/bbox';
@@ -12,6 +13,7 @@ export default class MapboxSearch {
         this.highlightID = '_highlighted_search__';
         this.layerChanged = false;
         this.searchVisible = false;
+        this.controlContainerClass = '_mapboxgl-search-ctrl__';
     }
 
     onAdd(map) {
@@ -22,13 +24,17 @@ export default class MapboxSearch {
             this.addInputObserver();
             this.createHighlightLayers();
 
+            this._controlContainer = document.createElement('div');
+            this._controlContainer.className = `mapboxgl-ctrl mapboxgl-ctrl-group ${this.controlContainerClass}`;
+
             //begin to add dom elements to search control
             this._container = document.createElement('div');
             this.addIdentifier(this.options.containerClass, this._container);
+            this._map._container.appendChild(this._container);
 
             this._searchBtn = document.createElement('button');
             this.addIdentifier(this.options.btnID, this._searchBtn);
-            this._container.appendChild(this._searchBtn);
+            this._controlContainer.appendChild(this._searchBtn);
 
             //event listener to toggle search
             this._searchBtn.addEventListener('click', () => {
@@ -53,12 +59,12 @@ export default class MapboxSearch {
 
             this._container.appendChild(this._input);
 
-            return this._container;
+            return this._controlContainer;
         }
     }
 
     onRemove() {
-        this._container.parentNode.removeChild(this._container);
+        this._controlContainer.parentNode.removeChild(this._controlContainer);
         this._map = undefined;
     }
 
@@ -122,8 +128,8 @@ export default class MapboxSearch {
         const elmName = 'mapbox-search';
 
         if (isDiv) {
-            this.options.containerClass = `${elmName}-container`;
-            elm.className = `mapboxgl-ctrl mapboxgl-ctrl-group ${this.options.containerClass}`;
+            this.options.containerClass = `draggable ${elmName}-container`;
+            elm.className = this.options.containerClass;
         } else if (isInput) {
             this.options.inputID = `${elmName}-input`;
             elm.className = elmName;
@@ -151,7 +157,7 @@ export default class MapboxSearch {
 
         const cat = 'category';
         //get unique set of categories       
-        this.uniqLyrCat = jsMap(uniqBy(this.options.layers, cat), cat);      
+        this.uniqLyrCat = jsMap(uniqBy(this.options.layers, cat), cat);
         this.layerDropwdowns = [];
 
         //populate layers in layer picker dropdown
@@ -160,7 +166,7 @@ export default class MapboxSearch {
             let optGrp = document.createElement('optgroup');
             //create an 'empty' category if no category is passed
             optGrp.setAttribute('label', noCategory ? '' : category);
-            
+
             let layers = noCategory ? this.options.layers.filter(lyr => isNil(lyr.category)) : this.options.layers.filter(lyr => lyr.category === category);
 
             for (const lyr of layers) {
@@ -195,7 +201,7 @@ export default class MapboxSearch {
         //check layer type to highlight polygon vs circle vs linestring
         for (const layer of this.options.layers) {
             const { dataPath, highlightColor, source, type } = layer;
-            
+
             if (!isNil(dataPath) && isString(dataPath)) {
                 this._map.getSource(source).setData(dataPath);
             }
@@ -231,11 +237,12 @@ export default class MapboxSearch {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
-                    if (node.className.includes(this.options.containerClass)) {
+                    if (isString(node.className) && node.className.includes(this.controlContainerClass)) {
                         observer.disconnect();
 
                         this._map.once('idle', () => {
                             this.populateData();
+                            this.initDrag();
                         })
                     }
                 });
@@ -292,6 +299,41 @@ export default class MapboxSearch {
         } else if (!isNil(this.chosenLayer.excludedProperties) && Array.isArray(this.chosenLayer.excludedProperties)) {
             let keys = Object.keys(items[0]);
             this.suggestions.keys = pullAll(keys, this.chosenLayer.excludedProperties);
+        }
+    }
+
+    initDrag() {
+        // target elements with the "draggable" class
+        interact('.draggable')
+            .draggable({
+                // enable inertial throwing
+                inertia: true,
+                // keep the element within the area of it's parent
+                modifiers: [
+                    interact.modifiers.restrictRect({
+                        restriction: 'parent',
+                        endOnly: true
+                    })
+                ],
+                autoScroll: false,
+                listeners: {
+                    // call this function on every dragmove event
+                    move: dragMoveListener,
+                }
+            })
+
+        function dragMoveListener(event) {
+            var target = event.target
+            // keep the dragged position in the data-x/data-y attributes
+            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
+            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+
+            // translate the element
+            target.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
+
+            // update the posiion attributes
+            target.setAttribute('data-x', x)
+            target.setAttribute('data-y', y)
         }
     }
 

@@ -7,7 +7,11 @@
 
 .mapbox-search-container {
     display: none;
-    max-width: 425px;
+    max-width: 500px;
+    position: fixed;
+    left: 50%;
+    top: 10%;
+    transform: translate(-50%, -50%);
 
     &.active-search {
         box-shadow: none;
