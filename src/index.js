@@ -150,17 +150,18 @@ export default class MapboxSearch {
         this._selectSearch.className = 'mapbox-search-select';
 
         const cat = 'category';
-
-        //get unique set of layers
-        this.uniqLyrCat = jsMap(uniqBy(this.options.layers, cat), cat);
+        //get unique set of categories       
+        this.uniqLyrCat = jsMap(uniqBy(this.options.layers, cat), cat);      
         this.layerDropwdowns = [];
 
         //populate layers in layer picker dropdown
         for (const category of this.uniqLyrCat) {
+            let noCategory = isNil(category);
             let optGrp = document.createElement('optgroup');
-            optGrp.setAttribute('label', category);
-
-            let layers = this.options.layers.filter(lyr => lyr.category === category);
+            //create an 'empty' category if no category is passed
+            optGrp.setAttribute('label', noCategory ? '' : category);
+            
+            let layers = noCategory ? this.options.layers.filter(lyr => isNil(lyr.category)) : this.options.layers.filter(lyr => lyr.category === category);
 
             for (const lyr of layers) {
                 let opt = document.createElement('option');
