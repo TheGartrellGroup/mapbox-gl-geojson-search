@@ -1,5 +1,6 @@
 'use strict';
 
+import Choices from "choices.js/public/assets/scripts/choices";
 import autoComplete from "@tarekraafat/autocomplete.js";
 import interact from 'interactjs'
 import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, pullAll } from 'lodash';
@@ -38,7 +39,7 @@ export default class MapboxSearch {
 
             //event listener to toggle search
             this._searchBtn.addEventListener('click', () => {
-                const elms = [this._container, this._searchBtn, this._selectSearch, this._input];
+                const elms = [this._container, this._searchBtn, this._selectSearch, this._input, this._layerPicker.containerOuter.element];
                 elms.forEach(elm => elm.classList.toggle('active-search'));
 
                 this.searchVisible = !this.searchVisible;
@@ -56,8 +57,11 @@ export default class MapboxSearch {
             this._input.type = 'search';
             this._input.placeholder = this.options.placeholderText;
             this.addIdentifier(this.options.inputID, this._input);
-
             this._container.appendChild(this._input);
+
+            this._selectSearch = document.createElement('select');
+            this._selectSearch.id = 'mapbox-search-select';
+            this._container.appendChild(this._selectSearch);
 
             return this._controlContainer;
         }
@@ -152,35 +156,48 @@ export default class MapboxSearch {
     }
 
     createLayerDropdown() {
-        this._selectSearch = document.createElement('select');
-        this._selectSearch.className = 'mapbox-search-select';
-
-        const cat = 'category';
-        //get unique set of categories       
+        //get unique set of categories   
+        const cat = 'category';    
         this.uniqLyrCat = jsMap(uniqBy(this.options.layers, cat), cat);
-        this.layerDropwdowns = [];
+
+        let layerDropdowns = [];
+        let i = 0;
 
         //populate layers in layer picker dropdown
         for (const category of this.uniqLyrCat) {
+            i++;
             let noCategory = isNil(category);
-            let optGrp = document.createElement('optgroup');
-            //create an 'empty' category if no category is passed
-            optGrp.setAttribute('label', noCategory ? '' : category);
+            let layerPickerOptions = {
+                label: noCategory ? '' : category,
+                id: i,
+                disabled: false,
+                choices: []
+            }
+
 
             let layers = noCategory ? this.options.layers.filter(lyr => isNil(lyr.category)) : this.options.layers.filter(lyr => lyr.category === category);
 
             for (const lyr of layers) {
-                let opt = document.createElement('option');
-                opt.value = lyr.displayName;
-                opt.text = lyr.displayName;
-                optGrp.appendChild(opt);
+                let layerSelectConfig = {
+                    value: lyr.displayName,
+                    label: lyr.displayName
+                }
+                layerPickerOptions.choices.push(layerSelectConfig)
             }
 
-            this._selectSearch.appendChild(optGrp);
+            layerDropdowns.push(layerPickerOptions);
         }
 
+        this._layerPicker = new Choices(`#${this._selectSearch.id}`, {
+            placeholder: true,
+            maxItemCount: this.options.maxResults,
+            searchFloor: this.options.characterThreshold,
+            itemSelectText:'',
+            choices: layerDropdowns
+        }).setValue([this.chosenLayer.displayName]);
+
         const wrapper = document.getElementsByClassName('autoComplete_wrapper')[0];
-        wrapper.appendChild(this._selectSearch);
+        wrapper.appendChild(this._layerPicker.containerOuter.element);
 
         //trigger event when layer is change 
         //new layer data is loaded into autocomplete

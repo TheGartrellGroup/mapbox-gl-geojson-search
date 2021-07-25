@@ -1,3 +1,5 @@
+@import url("~choices.js/public/assets/styles/base.min.css");
+@import url("~choices.js/public/assets/styles/choices.min.css");
 @import url("~@tarekraafat/autocomplete.js/dist/css/autoComplete.02.css");
 @import url("~@fortawesome/fontawesome-free/css/all.css");
 
@@ -39,16 +41,26 @@
             margin-top: 0.15rem;
         }
 
-    select.mapbox-search-select {
+    select#mapbox-search-select {
         font-size: 1rem;
         padding-left: 10px;
     }
     
     input.mapbox-search,
-    select.mapbox-search-select {
+    select#mapbox-search-select {
         display: none;
         background: none;
         border: none;
+    }
+
+    .choices {
+        display: none;
+        min-width: 125px;
+        margin-bottom: 0;
+
+        .choices__list--dropdown .choices__item--selectable {
+            padding-right: 0 !important;
+        }
     }
   }
 }
