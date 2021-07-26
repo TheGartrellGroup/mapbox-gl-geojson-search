@@ -19,6 +19,8 @@ npm run dev
 
 `maxResults` __(Number)__: maximum number of results shown for a given search _(optional; defaults to 5)_
 
+`draggable` __(Boolean)__: allows ability for input field to be draggable/moveable _(optional; defaults to false)_
+
 `layers`__(Array{Object})__ : list of layers with associated properties required for search _(required)_
   * `source`__(String)__: source reference id  - ie. same as `map.addSource(id)` _(required)_
   * `displayName`__(String)__: name shown in layer picker _(required)_

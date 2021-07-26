@@ -181,6 +181,11 @@ export default class MapboxSearch {
                     value: lyr.displayName,
                     label: lyr.displayName
                 }
+
+                if (lyr.displayName === this.chosenLayer.displayName) {
+                    layerSelectConfig.selected = true;
+                }
+
                 layerPickerOptions.choices.push(layerSelectConfig)
             }
 
@@ -189,16 +194,16 @@ export default class MapboxSearch {
 
         //instantiate searchable dropdown
         this._layerPicker = new Choices(`#${this._selectSearch.id}`, {
-            placeholder: true,
+            //placeholder: true,
             maxItemCount: this.options.maxResults,
-            searchFloor: this.options.characterThreshold,
+            searchFloor: 1,
             itemSelectText:'',
             renderChoiceLimit: 0,
             choices: layerDropdowns,
             fuseOptions: {
                 threshold: 0.0
             }
-        }).setValue([this.chosenLayer.displayName]);
+        });
 
         const wrapper = document.getElementsByClassName('autoComplete_wrapper')[0];
         wrapper.appendChild(this._layerPicker.containerOuter.element);
@@ -262,7 +267,10 @@ export default class MapboxSearch {
 
                         this._map.once('idle', () => {
                             this.populateData();
-                            this.initDrag();
+
+                            if (this.options.draggable) {
+                                this.initDrag();
+                            }
                         })
                     }
                 });
@@ -320,6 +328,8 @@ export default class MapboxSearch {
         } else if (!isNil(this.chosenLayer.excludedProperties) && Array.isArray(this.chosenLayer.excludedProperties)) {
             let keys = Object.keys(items[0]);
             this.suggestions.keys = pullAll(keys, this.chosenLayer.excludedProperties);
+        } else {
+            this.suggestions.keys = Object.keys(items[0]);
         }
     }
 
