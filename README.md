@@ -25,8 +25,8 @@ npm run dev
   * `category`__(String)__: groups layers in picker by categories _(required)_
   * `type`__(String)__: feature type (i.e. 'polygon')  _(required)_
   * `uniqueFeatureID`__(String)__: unique identifier to identify search features - ideally unique per feature  _(required)_
-  * `searchProperties`__(Array{String})__: properties to search against within geojson feature _(optional; cannot be used in conjuction with excludedProperties)_
-  * `excludedProperties`__(Array{String})__: properties to search against within geojson feature _(optional; cannot be used in conjuction with searchProperties)_
+  * `searchProperties`__(Array{String})__: search properties to include from geojson feature _(optional; cannot be used in conjuction with excludedProperties)_
+  * `excludedProperties`__(Array{String})__: search properties to excluded from geojson feature _(optional; cannot be used in conjuction with searchProperties)_
   * `zoomOnSearch`__(Boolean)__: zooms to feature on select _(optional; defaults to true)_
   * `highlightColor`__(String)__: highlight color _(optional; defaults to yellow - '#ff0')_
   * `dataPath`__(String)__: url path to data - only neccessary when loading layers dynamically or if source is initially empty _(optional)_
