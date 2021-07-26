@@ -174,7 +174,6 @@ export default class MapboxSearch {
                 choices: []
             }
 
-
             let layers = noCategory ? this.options.layers.filter(lyr => isNil(lyr.category)) : this.options.layers.filter(lyr => lyr.category === category);
 
             for (const lyr of layers) {
@@ -188,12 +187,17 @@ export default class MapboxSearch {
             layerDropdowns.push(layerPickerOptions);
         }
 
+        //instantiate searchable dropdown
         this._layerPicker = new Choices(`#${this._selectSearch.id}`, {
             placeholder: true,
             maxItemCount: this.options.maxResults,
             searchFloor: this.options.characterThreshold,
             itemSelectText:'',
-            choices: layerDropdowns
+            renderChoiceLimit: 0,
+            choices: layerDropdowns,
+            fuseOptions: {
+                threshold: 0.0
+            }
         }).setValue([this.chosenLayer.displayName]);
 
         const wrapper = document.getElementsByClassName('autoComplete_wrapper')[0];
@@ -211,7 +215,6 @@ export default class MapboxSearch {
             await this.getLayerData(newLyr);
             this._typeahead.data = this.suggestions;
         });
-
     }
 
     createHighlightLayers() {
@@ -276,6 +279,7 @@ export default class MapboxSearch {
         this.initTypeAhead();
         this.createLayerDropdown();
         this._container.style.display = 'initial';
+        this._controlContainer.style.display = 'initial';
     }
 
     //layer needs to be requested as raw geojson features
