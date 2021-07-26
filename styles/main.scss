@@ -7,9 +7,17 @@
     display: block !important;
 }
 
+._mapboxgl-search-ctrl__ {
+    display: none;
+
+    &.loaded {
+        display: block;
+    }
+}
+
 .mapbox-search-container {
     display: none;
-    max-width: 500px;
+    max-width: 600px;
     position: fixed;
     left: 50%;
     top: 10%;
@@ -19,14 +27,6 @@
         box-shadow: none;
         background: none;
     } 
-
-    button {
-        &.active-search {
-            float: right;
-            margin-left: 2px;
-            margin-top: 7px;
-        };
-    }
 
     .autoComplete_wrapper {
         display: flex;
@@ -55,11 +55,16 @@
 
     .choices {
         display: none;
-        min-width: 125px;
+        min-width: 175px;
         margin-bottom: 0;
 
         .choices__list--dropdown .choices__item--selectable {
             padding-right: 0 !important;
+        }
+
+        .choices__list .choices__list--dropdown {
+            max-height: 225px;
+            overflow-y: auto;
         }
     }
   }
