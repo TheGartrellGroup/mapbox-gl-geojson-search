@@ -62,6 +62,10 @@
         min-width: 175px;
         margin-bottom: 0;
 
+        .choices__inner {
+            min-height: initial;
+        }
+
         .choices__list--dropdown .choices__item--selectable {
             padding-right: 0 !important;
         }
