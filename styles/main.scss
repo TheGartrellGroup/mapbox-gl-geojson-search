@@ -1,7 +1,5 @@
-@import url("~choices.js/public/assets/styles/base.min.css");
 @import url("~choices.js/public/assets/styles/choices.min.css");
 @import url("~@tarekraafat/autocomplete.js/dist/css/autoComplete.02.css");
-@import url("~@fortawesome/fontawesome-free/css/all.css");
 
 .active-search {
     display: block !important;
@@ -12,6 +10,12 @@
 
     &.loaded {
         display: block;
+    }
+
+    > button {
+        background-image: url("../assets/search.svg");
+        background-repeat: no-repeat;
+        background-position: center;
     }
 }
 

@@ -4,7 +4,6 @@ import Choices from "choices.js/public/assets/scripts/choices";
 import autoComplete from "@tarekraafat/autocomplete.js";
 import interact from 'interactjs'
 import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, pullAll } from 'lodash';
-import '@fortawesome/fontawesome-free/js/all';
 import BBOX from '@turf/bbox';
 
 export default class MapboxSearch {
@@ -48,10 +47,6 @@ export default class MapboxSearch {
                     this._input.focus();
                 }
             });
-
-            this._searchBtnIcon = document.createElement('i');
-            this._searchBtnIcon.className = 'fa fa-search';
-            this._searchBtn.appendChild(this._searchBtnIcon);
 
             this._input = document.createElement('input');
             this._input.type = 'search';
