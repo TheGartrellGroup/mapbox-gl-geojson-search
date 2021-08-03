@@ -451,10 +451,7 @@ export default class MapboxSearch {
 
     typeaheadFilter(list) {
         //dedupe results shown to user;
-        const initResults = uniqBy(list, 'key');
-        const results = uniqBy(initResults, 'match');
-
-        return results;
+        return uniqBy(list, v => [v.key, v.match].join());
     }
 
     //highlight identified layer
