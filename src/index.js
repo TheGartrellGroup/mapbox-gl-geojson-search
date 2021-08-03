@@ -3,7 +3,7 @@
 import Choices from "choices.js/public/assets/scripts/choices";
 import autoComplete from "@tarekraafat/autocomplete.js";
 import interact from 'interactjs'
-import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, pullAll } from 'lodash';
+import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, pullAll, result } from 'lodash';
 import BBOX from '@turf/bbox';
 
 export default class MapboxSearch {
@@ -290,7 +290,6 @@ export default class MapboxSearch {
     //as both map.queryRenderedFeatures and map.querySourceFeatures 
     //do not allow this ability
     async getLayerData(lyr) {
-        debugger;
         this.chosenLayer = lyr;
         const props = ['source', 'displayName', 'id', 'category', 'type', 'uniqueFeatureID'];
         const layerSource = this._map.getSource(this.chosenLayer.source);
@@ -380,7 +379,17 @@ export default class MapboxSearch {
         });
 
         this._typeahead = new autoComplete({
-            data: this.suggestions,
+            data: {
+                src: this.suggestions.src,
+                keys: this.suggestions.keys,
+                filter: (list) => {
+                    //dedupe results shown to user;
+                    const initResults = uniqBy(list, 'key');
+                    const results = uniqBy(initResults, 'match');
+
+                    return results;
+                }
+            },
             threshold: this.options.characterThreshold,
             selector: id,
             submit: true,
