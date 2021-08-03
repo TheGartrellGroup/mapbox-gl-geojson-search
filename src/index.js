@@ -3,7 +3,7 @@
 import Choices from "choices.js/public/assets/scripts/choices";
 import autoComplete from "@tarekraafat/autocomplete.js";
 import interact from 'interactjs'
-import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, pullAll, result } from 'lodash';
+import { map as jsMap, get, isNil, isNumber, isObject, isString, uniqBy, pullAll } from 'lodash';
 import BBOX from '@turf/bbox';
 
 export default class MapboxSearch {
