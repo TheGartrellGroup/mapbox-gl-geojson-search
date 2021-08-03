@@ -213,7 +213,13 @@ export default class MapboxSearch {
             const newLyr = this.options.layers.filter(lyr => lyr.displayName === val)[0];
 
             await this.getLayerData(newLyr);
-            this._typeahead.data = this.suggestions;
+            this._typeahead.data = {
+                src: this.suggestions.src,
+                keys: this.suggestions.keys,
+                filter: (list) => {
+                    return this.typeaheadFilter(list)
+                }
+            }
         });
     }
 
@@ -383,11 +389,7 @@ export default class MapboxSearch {
                 src: this.suggestions.src,
                 keys: this.suggestions.keys,
                 filter: (list) => {
-                    //dedupe results shown to user;
-                    const initResults = uniqBy(list, 'key');
-                    const results = uniqBy(initResults, 'match');
-
-                    return results;
+                    return this.typeaheadFilter(list)
                 }
             },
             threshold: this.options.characterThreshold,
@@ -412,6 +414,7 @@ export default class MapboxSearch {
                 maxResults: this.options.maxResults,
                 noResults: true,
                 element: (list, data) => {
+                    //show a no results message
                     if (!data.results.length) {
                         const noResults = document.createElement("div");
                         noResults.setAttribute("class", "no-result");
@@ -444,6 +447,14 @@ export default class MapboxSearch {
                 }
             }
         })
+    }
+
+    typeaheadFilter(list) {
+        //dedupe results shown to user;
+        const initResults = uniqBy(list, 'key');
+        const results = uniqBy(initResults, 'match');
+
+        return results;
     }
 
     //highlight identified layer
