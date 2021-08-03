@@ -421,13 +421,11 @@ export default class MapboxSearch {
                             this.layerChanged = false;
                         }
 
-                        //identify unique features by provided id
-                        const id = event.detail.selection.value[this.chosenLayer.uniqueFeatureID];
                         const selection = get(event.detail.selection.value, event.detail.selection.key);
                         this._typeahead.input.value = selection;
                         this._typeahead.input.blur();
 
-                        this.identifyAndHiglight(id);
+                        this.identifyAndHiglight(selection, event.detail.selection.key);
                     },
                     keydown: (event) => {
                         if (event.code === 'Enter' || event.key === 'Enter' || event.which === 13) {
@@ -440,13 +438,13 @@ export default class MapboxSearch {
     }
 
     //highlight identified layer
-    identifyAndHiglight(id) {
+    identifyAndHiglight(val, key) {
 
         //only zoom to highlighted feature if zoomOnSearch !== false
         if (this.chosenLayer.zoomOnSearch || isNil(this.chosenLayer.zoomOnSearch)) {
             const pitch = this._map.getPitch();
             const bearing = this._map.getBearing();
-            const feats = this.currentData.features.filter(feat => feat.properties[this.chosenLayer.uniqueFeatureID] === id);
+            const feats = this.currentData.features.filter(feat => feat.properties[key] === val);
             const gj = {
                 "type": "FeatureCollection",
                 "features": feats
@@ -459,7 +457,7 @@ export default class MapboxSearch {
             });
         }
 
-        this._map.setFilter(`${this.chosenLayer.source}${this.highlightID}`, ['in', this.chosenLayer.uniqueFeatureID, id]);
+        this._map.setFilter(`${this.chosenLayer.source}${this.highlightID}`, ['in', key, val]);
         this.highlighted = true;
     }
 
