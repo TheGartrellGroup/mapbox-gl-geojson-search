@@ -58,3 +58,55 @@ npm run dev
 
   map.addControl(searchControl)
 ```
+
+## Assumptions
+The underlying geojson must have consistent keys. This means that for a given FeatureCollection, each feature must have the same properties as the other features in the collection. As an example, the following would be incompatible as the second feature is missing the `name` property. 
+
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1,
+        "name": "Feature 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.437,
+          64.320
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.828,
+          49.382
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3,
+        "name": "Feature 3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.1718,
+          54.775
+        ]
+      }
+    }
+  ]
+}
+```
