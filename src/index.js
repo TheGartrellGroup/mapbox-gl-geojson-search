@@ -290,6 +290,7 @@ export default class MapboxSearch {
     //as both map.queryRenderedFeatures and map.querySourceFeatures 
     //do not allow this ability
     async getLayerData(lyr) {
+        debugger;
         this.chosenLayer = lyr;
         const props = ['source', 'displayName', 'id', 'category', 'type', 'uniqueFeatureID'];
         const layerSource = this._map.getSource(this.chosenLayer.source);
@@ -399,7 +400,16 @@ export default class MapboxSearch {
                 highlight: true
             },
             resultsList: {
-                maxResults: this.options.maxResults
+                maxResults: this.options.maxResults,
+                noResults: true,
+                element: (list, data) => {
+                    if (!data.results.length) {
+                        const noResults = document.createElement("div");
+                        noResults.setAttribute("class", "no-result");
+                        noResults.innerHTML = `<span>No Results</span>`;
+                        list.appendChild(noResults);
+                    }
+                }
             },
             events: {
                 input: {
@@ -431,6 +441,7 @@ export default class MapboxSearch {
 
     //highlight identified layer
     identifyAndHiglight(id) {
+
         //only zoom to highlighted feature if zoomOnSearch !== false
         if (this.chosenLayer.zoomOnSearch || isNil(this.chosenLayer.zoomOnSearch)) {
             const pitch = this._map.getPitch();

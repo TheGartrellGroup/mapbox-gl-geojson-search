@@ -32,6 +32,23 @@
         background: none;
     } 
 
+    .autoComplete_wrapper,
+    .no-result {
+        display: flex;
+        background: #fff;
+        border: 0;
+        border-radius: 4px; 
+        color: #747474;
+        outline: 0;
+    }
+
+    .no-result {
+        font-size: 0.9rem;
+        padding-left: 5px;
+        overflow: hidden !important;
+        min-height: 20px;
+    }
+
     .autoComplete_wrapper {
         display: flex;
         justify-content: flex-end;
@@ -43,6 +60,7 @@
 
         ul {
             margin-top: 0.15rem;
+            width: 100%;
         }
 
     select#mapbox-search-select {
@@ -64,6 +82,7 @@
 
         .choices__inner {
             min-height: initial;
+            padding: 7.5px 0.5px 3.75px
         }
 
         .choices__list--dropdown .choices__item--selectable {
