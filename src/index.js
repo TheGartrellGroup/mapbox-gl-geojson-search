@@ -299,6 +299,9 @@ export default class MapboxSearch {
         this.chosenLayer = lyr;
         const props = ['source', 'displayName', 'id', 'category', 'type', 'uniqueFeatureID'];
         const layerSource = this._map.getSource(this.chosenLayer.source);
+        const randomKey = Math.random().toString(36).substr(3, 2);
+        const randomVal = Math.random().toString(36).substr(3, 4);
+        const queryParam = `?x-${randomKey}=${randomVal}`;
 
         if (isNil(this.chosenLayer.uniqueFeatureID) || !this.chosenLayer.uniqueFeatureID.length) {
             throw new Error('options.uniqueFeatureID is required for every layer');
@@ -307,14 +310,14 @@ export default class MapboxSearch {
         if (!isNil(this.chosenLayer.searchProperties) && !isNil(this.chosenLayer.excludedProperties)) {
             throw new Error('both options.searchProperties and options.excludedProperties cannot be included at the same time')
         }
-
+        
         if (layerSource.type !== 'geojson') {
             throw new Error(`${source} layer is not a valid geojson`);
         } else if (!isNil(this.chosenLayer.dataPath) && isString(this.chosenLayer.dataPath)) {
-            const response = await fetch(this.chosenLayer.dataPath);
+            const response = await fetch(this.chosenLayer.dataPath+queryParam);
             this.currentData = await response.json();
         } else if (isString(layerSource._data)) {
-            const response = await fetch(layerSource._data);
+            const response = await fetch(layerSource._data+queryParam);
             this.currentData = await response.json();
         } else {
             this.currentData = layerSource._data;
