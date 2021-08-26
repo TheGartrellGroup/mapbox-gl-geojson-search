@@ -1,5 +1,6 @@
 'use strict';
 
+import axios from "axios";
 import Choices from "choices.js/public/assets/scripts/choices";
 import autoComplete from "@tarekraafat/autocomplete.js";
 import interact from 'interactjs'
@@ -22,7 +23,6 @@ export default class MapboxSearch {
 
             this.validateControlOptions();
             this.addInputObserver();
-            this.createHighlightLayers();
 
             this._controlContainer = document.createElement('div');
             this._controlContainer.className = `mapboxgl-ctrl mapboxgl-ctrl-group ${this.controlContainerClass}`;
@@ -223,39 +223,45 @@ export default class MapboxSearch {
         });
     }
 
-    createHighlightLayers() {
+    createHighlightLayer(layer) {
         //check layer type to highlight polygon vs circle vs linestring
-        for (const layer of this.options.layers) {
-            const { dataPath, highlightColor, source, type } = layer;
+        const { dataPath, highlightColor, source, type } = layer;
+        const lyrSource = this._map.getSource(source);
 
-            if (!isNil(dataPath) && isString(dataPath)) {
-                this._map.getSource(source).setData(dataPath);
-            }
-
-            let highlightLayerConfig = {
-                'id': `${source}${this.highlightID}`,
-                'source': source,
-                'filter': ['in', this.highlightID, '']
-            };
-
-            if (type === 'polygon' || type === 'linestring' || type === 'line') {
-                highlightLayerConfig.type = 'line';
-                highlightLayerConfig.paint = {
-                    'line-color': highlightColor || '#ff0',
-                    'line-width': 5
-                }
-            } else {
-                highlightLayerConfig.type = 'circle';
-                highlightLayerConfig.paint = {
-                    'circle-opacity': 0,
-                    'circle-stroke-color': highlightColor || '#ff0',
-                    'circle-stroke-width': 5
-                }
-            }
-
-            this._map.addLayer(highlightLayerConfig)
+        if (!isNil(dataPath) && isString(dataPath) && !isString(lyrSource._data)) {
+            lyrSource.setData(dataPath);
         }
 
+        let highlightLayerConfig = {
+            'id': `${source}${this.highlightID}`,
+            'source': source,
+            'filter': ['in', this.highlightID, '']
+        };
+
+        if (type === 'polygon' || type === 'linestring' || type === 'line') {
+            highlightLayerConfig.type = 'line';
+            highlightLayerConfig.paint = {
+                'line-color': highlightColor || '#ff0',
+                'line-width': 5
+            }
+        } else {
+            highlightLayerConfig.type = 'circle';
+            highlightLayerConfig.paint = {
+                'circle-opacity': 0,
+                'circle-stroke-color': highlightColor || '#ff0',
+                'circle-stroke-width': 5
+            }
+        }
+
+        const allLyrs = this._map.getStyle().layers;
+        const highlightArray = allLyrs.filter(lyr => lyr.id.includes(this.highlightID));
+
+        //it will never be more than a single highlight lyr
+        if (highlightArray.length) {
+            this._map.removeLayer(highlightArray[0].id);
+        }
+        
+        this._map.addLayer(highlightLayerConfig);
     }
 
     //mutation needed to populate autocomplete with layer data
@@ -310,18 +316,20 @@ export default class MapboxSearch {
         if (!isNil(this.chosenLayer.searchProperties) && !isNil(this.chosenLayer.excludedProperties)) {
             throw new Error('both options.searchProperties and options.excludedProperties cannot be included at the same time')
         }
-        
+
         if (layerSource.type !== 'geojson') {
             throw new Error(`${source} layer is not a valid geojson`);
         } else if (!isNil(this.chosenLayer.dataPath) && isString(this.chosenLayer.dataPath)) {
-            const response = await fetch(this.chosenLayer.dataPath+queryParam);
-            this.currentData = await response.json();
+            const resp = await axios.get(this.chosenLayer.dataPath+queryParam);
+            this.currentData = resp.data;
         } else if (isString(layerSource._data)) {
-            const response = await fetch(layerSource._data+queryParam);
-            this.currentData = await response.json();
+            const resp = await axios.get(layerSource._data+queryParam);
+            this.currentData = resp.data;
         } else {
             this.currentData = layerSource._data;
         }
+
+        this.createHighlightLayer(this.chosenLayer);
 
         let items = jsMap(this.currentData.features, item => item.properties);
         //replace null values with empty string
