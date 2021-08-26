@@ -492,7 +492,10 @@ export default class MapboxSearch {
     //remove prior highlight
     clearPreviousHighlight() {
         if (!isNil(this.previousLayer)) {
-            this._map.setFilter(`${this.previousLayer.source}${this.highlightID}`, ['in', this.highlightID, ''])
+            const highlightID = this.previousLayer.source+this.highlightID;
+            if (this._map.getLayer(highlightID)) {
+                this._map.removeLayer(highlightID);
+            }
         }
 
         this._map.setFilter(`${this.chosenLayer.source}${this.highlightID}`, ['in', this.highlightID, ''])
